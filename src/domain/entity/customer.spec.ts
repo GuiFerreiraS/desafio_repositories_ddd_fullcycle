@@ -1,3 +1,7 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import EnviaConsoleLog1Handler from "../event/customer/handler/send-console-log-1.handler";
+import EnviaConsoleLog2Handler from "../event/customer/handler/send-console-log-2.handler";
+import EnviaConsoleLogHandler from "../event/customer/handler/send-console-log.handler";
 import Address from "./address";
 import Customer from "./customer";
 
@@ -51,5 +55,59 @@ describe("Customer unity tests", () => {
 
     customer.addRewardPoints(5);
     expect(customer.rewardPoints).toBe(10);
+  });
+
+  it("should notify all event handlers when customer is created", () => {
+    const eventDispatcher = new EventDispatcher();
+    const enviaConsoleLog1Handle = new EnviaConsoleLog1Handler();
+    const enviaConsoleLog2Handle = new EnviaConsoleLog2Handler();
+    const spyEnviaConsoleLog1Handle = jest.spyOn(
+      enviaConsoleLog1Handle,
+      "handle"
+    );
+    const spyEnviaConsoleLog2Handle = jest.spyOn(
+      enviaConsoleLog2Handle,
+      "handle"
+    );
+
+    eventDispatcher.register("CustomerCreatedEvent", enviaConsoleLog1Handle);
+    eventDispatcher.register("CustomerCreatedEvent", enviaConsoleLog2Handle);
+
+    expect(
+      eventDispatcher.getEventHandlers["CustomerCreatedEvent"][0]
+    ).toMatchObject(enviaConsoleLog1Handle);
+
+    expect(
+      eventDispatcher.getEventHandlers["CustomerCreatedEvent"][1]
+    ).toMatchObject(enviaConsoleLog2Handle);
+
+    new Customer("1", "Customer 1", eventDispatcher);
+
+    expect(spyEnviaConsoleLog1Handle).toHaveBeenCalled();
+    expect(spyEnviaConsoleLog2Handle).toHaveBeenCalled();
+  });
+
+  it("should notify all event handlers when customer address is changed", () => {
+    const eventDispatcher = new EventDispatcher();
+    const enviaConsoleLogHandle = new EnviaConsoleLogHandler();
+    const spyEnviaConsoleLogHandle = jest.spyOn(
+      enviaConsoleLogHandle,
+      "handle"
+    );
+    eventDispatcher.register(
+      "CustomerAddressChangedEvent",
+      enviaConsoleLogHandle
+    );
+
+    expect(
+      eventDispatcher.getEventHandlers["CustomerAddressChangedEvent"][0]
+    ).toMatchObject(enviaConsoleLogHandle);
+
+    const customer = new Customer("1", "Customer 1", eventDispatcher);
+    const address = new Address("Street 1", 10, "387468-000", "New York");
+
+    customer.changeAddress(address);
+
+    expect(spyEnviaConsoleLogHandle).toHaveBeenCalled();
   });
 });

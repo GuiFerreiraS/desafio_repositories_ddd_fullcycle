@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "yarn run tsc -- --noEmit && jest",
-    "test:jest": "jest",
+    "test:watch": "jest --watch",
     "tsc": "tsc"
   }
 }
