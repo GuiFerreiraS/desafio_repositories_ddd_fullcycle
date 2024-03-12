@@ -1,8 +1,11 @@
 import Customer from "../../../entity/customer";
 import EventHandlerInterface from "../../@shared/event-handler.interface";
 import EventInterface from "../../@shared/event.interface";
+import CustomerAddressChangedEvent from "../customer-address-changed.event";
 
-export default class EnviaConsoleLogHandler implements EventHandlerInterface {
+export default class EnviaConsoleLogHandler
+  implements EventHandlerInterface<CustomerAddressChangedEvent>
+{
   handle(event: EventInterface<Customer>): void {
     const { Address, id, name } = event.eventData;
     console.log(
